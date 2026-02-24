@@ -1,0 +1,106 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Channel {
+  id          Int                 @id @default(autoincrement())
+  name        String
+  type        String
+  campaigns   Campaign[]
+  daily       DailyPerformance[]
+  touchpoints Touchpoint[]
+  results     AttributionResult[]
+}
+
+model Campaign {
+  id          Int                 @id @default(autoincrement())
+  channel     Channel             @relation(fields: [channelId], references: [id])
+  channelId   Int
+  name        String
+  status      String
+  startDate   DateTime?
+  endDate     DateTime?
+  daily       DailyPerformance[]
+  touchpoints Touchpoint[]
+  results     AttributionResult[]
+}
+
+model DailyPerformance {
+  id          Int       @id @default(autoincrement())
+  date        DateTime
+  channel     Channel   @relation(fields: [channelId], references: [id])
+  channelId   Int
+  campaign    Campaign? @relation(fields: [campaignId], references: [id])
+  campaignId  Int?
+  impressions Int       @default(0)
+  clicks      Int       @default(0)
+  spend       Float     @default(0)
+  conversions Int       @default(0)
+  revenue     Float     @default(0)
+}
+
+model FunnelStage {
+  id         Int           @id @default(autoincrement())
+  name       String
+  orderIndex Int
+  events     FunnelEvent[]
+}
+
+model FunnelEvent {
+  id        Int         @id @default(autoincrement())
+  userId    String
+  sessionId String
+  time      DateTime
+  stage     FunnelStage @relation(fields: [stageId], references: [id])
+  stageId   Int
+}
+
+model Touchpoint {
+  id          Int         @id @default(autoincrement())
+  userId      String
+  sessionId   String
+  time        DateTime
+  channel     Channel     @relation(fields: [channelId], references: [id])
+  channelId   Int
+  campaign    Campaign?   @relation(fields: [campaignId], references: [id])
+  campaignId  Int?
+  conversion  Conversion? @relation(fields: [conversionId], references: [id])
+  conversionId Int?
+}
+
+model Conversion {
+  id          Int          @id @default(autoincrement())
+  userId      String
+  time        DateTime
+  revenue     Float
+  type        String
+  touchpoints Touchpoint[]
+}
+
+model AttributionModel {
+  id      Int                 @id @default(autoincrement())
+  name    String              @unique
+  params  Json?
+  results AttributionResult[]
+}
+
+model AttributionResult {
+  id          Int              @id @default(autoincrement())
+  date        DateTime
+  channel     Channel          @relation(fields: [channelId], references: [id])
+  channelId   Int
+  campaign    Campaign?        @relation(fields: [campaignId], references: [id])
+  campaignId  Int?
+  model       AttributionModel @relation(fields: [modelId], references: [id])
+  modelId     Int
+  conversions Float            @default(0)
+  revenue     Float            @default(0)
+
+  @@unique([date, channelId, campaignId, modelId], name: "date_model_channel_campaign")
+}
+
