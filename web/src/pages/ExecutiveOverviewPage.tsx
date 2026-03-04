@@ -8,6 +8,7 @@ import {
   Legend,
   ResponsiveContainer,
 } from "recharts";
+import { useReport } from "../reportContext";
 
 type OverviewKpis = {
   totalSpend: number;
@@ -18,28 +19,61 @@ type OverviewKpis = {
 };
 
 type TrendPoint = { date: string; spend: number; revenue: number };
+type ChannelRow = {
+  channel: string;
+  spend: number;
+  revenue: number;
+  conversions: number;
+  cpa?: number;
+  roas?: number;
+};
 
 export function ExecutiveOverviewPage() {
+  const { reportId } = useReport();
   const [kpis, setKpis] = useState<OverviewKpis | null>(null);
   const [trend, setTrend] = useState<TrendPoint[]>([]);
+  const [channels, setChannels] = useState<ChannelRow[]>([]);
+  const [recommendations, setRecommendations] = useState<{
+    headline: string;
+    suggestions: string[];
+    bestChannels: Array<{ channel: string; roas: number; spend: number; revenue: number }>;
+  } | null>(null);
 
   useEffect(() => {
-    fetch("/api/overview/kpis")
+    const qs = reportId ? `?reportId=${encodeURIComponent(reportId)}` : "";
+
+    fetch(reportId ? `/api/report/kpis${qs}` : "/api/overview/kpis")
       .then((res) => res.json())
       .then(setKpis)
       .catch((err) => console.error("Failed to load KPIs", err));
 
-    fetch("/api/overview/trend")
+    fetch(reportId ? `/api/report/trend${qs}` : "/api/overview/trend")
       .then((res) => res.json())
       .then(setTrend)
       .catch((err) => console.error("Failed to load trend", err));
-  }, []);
+
+    fetch(reportId ? `/api/report/channels${qs}` : "/api/channels/summary")
+      .then((res) => res.json())
+      .then(setChannels)
+      .catch((err) => console.error("Failed to load channels", err));
+
+    if (reportId) {
+      fetch(`/api/report/recommendations${qs}`)
+        .then((res) => res.json())
+        .then(setRecommendations)
+        .catch((err) => console.error("Failed to load recommendations", err));
+    } else {
+      setRecommendations(null);
+    }
+  }, [reportId]);
 
   return (
     <div className="space-y-8">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold text-slate-900">Executive Overview</h1>
-        <div className="text-sm text-slate-500">Basic MVP dashboard skeleton</div>
+        <div className="text-sm text-slate-500">
+          {reportId ? "Powered by uploaded CSV" : "Mock data (upload a CSV to replace)"}
+        </div>
       </div>
 
       {/* KPI cards */}
@@ -71,16 +105,63 @@ export function ExecutiveOverviewPage() {
         </div>
       </div>
 
+      {/* Recommendations */}
+      {recommendations ? (
+        <div className="bg-white rounded-xl shadow-sm border border-slate-100 p-4">
+          <h2 className="text-lg font-semibold text-slate-900 mb-2">Where to invest more</h2>
+          <p className="text-sm text-slate-500 mb-3">{recommendations.headline}</p>
+          <ul className="text-sm text-slate-700 list-disc pl-5 space-y-1">
+            {recommendations.suggestions.map((s) => (
+              <li key={s}>{s}</li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
+
       {/* Channel performance placeholder */}
       <div className="bg-white rounded-xl shadow-sm border border-slate-100 p-4">
         <h2 className="text-lg font-semibold text-slate-900 mb-2">
           Channel performance ranking
         </h2>
-        <p className="text-sm text-slate-500">
-          Placeholder table – will be powered by channel metrics from the API.
+        <p className="text-sm text-slate-500 mb-3">
+          Compare revenue vs spend by promo method / channel.
         </p>
-        <div className="mt-4 border border-dashed border-slate-200 rounded-md p-6 text-sm text-slate-400">
-          Channel ranking table or bar chart goes here.
+        <div className="overflow-auto">
+          <table className="min-w-full text-xs">
+            <thead className="text-slate-500">
+              <tr>
+                <th className="text-left py-1 pr-2">Channel</th>
+                <th className="text-right py-1 px-2">Spend</th>
+                <th className="text-right py-1 px-2">Revenue</th>
+                <th className="text-right py-1 px-2">ROAS</th>
+                <th className="text-right py-1 px-2">Conv.</th>
+                <th className="text-right py-1 pl-2">CPA</th>
+              </tr>
+            </thead>
+            <tbody className="text-slate-800">
+              {channels.slice(0, 10).map((c) => {
+                const roas = typeof c.roas === "number" ? c.roas : c.spend > 0 ? c.revenue / c.spend : 0;
+                const cpa = typeof c.cpa === "number" ? c.cpa : c.conversions > 0 ? c.spend / c.conversions : 0;
+                return (
+                  <tr key={c.channel} className="border-t border-slate-100">
+                    <td className="py-1 pr-2">{c.channel}</td>
+                    <td className="py-1 px-2 text-right">₹{c.spend.toLocaleString()}</td>
+                    <td className="py-1 px-2 text-right">₹{c.revenue.toLocaleString()}</td>
+                    <td className="py-1 px-2 text-right">{roas.toFixed(2)}</td>
+                    <td className="py-1 px-2 text-right">{c.conversions.toLocaleString()}</td>
+                    <td className="py-1 pl-2 text-right">{cpa === 0 ? "-" : `₹${cpa.toFixed(1)}`}</td>
+                  </tr>
+                );
+              })}
+              {channels.length === 0 ? (
+                <tr>
+                  <td className="py-3 text-slate-400" colSpan={6}>
+                    No channel data yet. Upload a CSV to populate this.
+                  </td>
+                </tr>
+              ) : null}
+            </tbody>
+          </table>
         </div>
       </div>
     </div>

@@ -1,6 +1,10 @@
 {
-  "devDependencies": {
-    "@types/cors": "^2.8.19",
-    "vite": "^7.3.1"
+  "name": "mproject",
+  "private": true,
+  "scripts": {
+    "install:all": "npm --prefix server install && npm --prefix web install",
+    "postinstall": "npm run install:all",
+    "dev:server": "npm --prefix server run dev",
+    "dev:web": "npm --prefix web run dev"
   }
 }

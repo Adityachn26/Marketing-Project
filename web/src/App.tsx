@@ -3,6 +3,7 @@ import { ExecutiveOverviewPage } from "./pages/ExecutiveOverviewPage";
 import { ChannelAnalyticsPage } from "./pages/ChannelAnalyticsPage";
 import { FunnelViewPage } from "./pages/FunnelViewPage";
 import { AttributionStudioPage } from "./pages/AttributionStudioPage";
+import { UploadBar } from "./components/UploadBar";
 
 const navItemClasses =
   "px-3 py-2 rounded-md text-sm font-medium hover:bg-slate-800/60 transition-colors";
@@ -48,6 +49,12 @@ export default function App() {
               Attribution
             </NavLink>
           </nav>
+        </div>
+        <div className="max-w-6xl mx-auto px-6 pb-4 flex items-center justify-between">
+          <div className="text-xs text-slate-200/70">
+            Upload a CSV to power the dashboard (channel/promo_method + spend + revenue).
+          </div>
+          <UploadBar />
         </div>
       </header>
       <main className="flex-1 max-w-6xl mx-auto w-full px-6 py-6">
