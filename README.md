@@ -1,6 +1,19 @@
 # Marketing Analytics Dashboard
 
-A marketing analytics platform with React + TypeScript frontend and Fastify + Prisma backend.
+A modern, production-grade marketing analytics platform built with React + TypeScript frontend and Fastify + Prisma backend. Features a beautiful glassmorphism UI, dark mode, animated components, and comprehensive marketing data visualization.
+
+## ✨ Features
+
+- 📊 **Executive Overview** — KPI cards with animated counters, area charts, smart recommendations
+- 📈 **Channel Analytics** — Bar charts, pie charts, conversion efficiency tables, campaign performance
+- 🔽 **Funnel View** — Visual conversion funnel, stage analysis, drop-off tracking
+- 🎯 **Attribution Studio** — 5 attribution models, radar charts, revenue redistribution analysis
+- ⚙️ **Settings** — Dark mode, currency preferences, notification controls, data management
+- 🌙 **Dark Mode** — Full dark theme support with smooth transitions
+- 📤 **CSV Upload** — Upload your own marketing data to power the dashboard
+- 🔔 **Notifications** — Activity notification system
+- 🔍 **Search** — Quick search across dashboard
+- 📱 **Responsive** — Collapsible sidebar, mobile-friendly layout
 
 ## Quick Start
 
@@ -10,9 +23,10 @@ A marketing analytics platform with React + TypeScript frontend and Fastify + Pr
 
 ## Tech Stack
 
-- **Frontend**: React, TypeScript, Vite, Tailwind CSS, Recharts
+- **Frontend**: React 18, TypeScript, Vite, Tailwind CSS, Recharts, Lucide Icons, Framer Motion
 - **Backend**: Node.js, TypeScript, Fastify
 - **Database**: Prisma ORM, PostgreSQL
+- **UI**: Glassmorphism design, custom component library, CSS animations
 
 ---
 
@@ -24,12 +38,32 @@ Mproject/
 │   ├── prisma/
 │   │   └── schema.prisma   # Database schema
 │   ├── src/
-│   │   └── index.ts        # API routes (mock data)
+│   │   ├── index.ts        # API routes (mock data)
+│   │   ├── reportAnalytics.ts
+│   │   ├── reportStore.ts
+│   │   └── reportTypes.ts
 │   └── env.example         # Copy to .env for DB config
 ├── web/                    # React frontend
 │   └── src/
-│       ├── App.tsx         # Layout + routing
-│       └── pages/          # Executive, Channels, Funnel, Attribution
+│       ├── App.tsx         # Sidebar layout + routing
+│       ├── themeContext.tsx # Dark mode provider
+│       ├── reportContext.tsx
+│       ├── components/
+│       │   ├── Sidebar.tsx         # Collapsible navigation
+│       │   ├── TopBar.tsx          # Search, notifications, upload
+│       │   ├── Card.tsx            # Reusable card component
+│       │   ├── AnimatedNumber.tsx  # Animated counter
+│       │   ├── EmptyState.tsx      # Empty state illustrations
+│       │   ├── Skeleton.tsx        # Loading skeletons
+│       │   ├── PageHeader.tsx      # Page titles with badges
+│       │   ├── Footer.tsx          # App footer
+│       │   └── UploadBar.tsx       # CSV upload
+│       └── pages/
+│           ├── ExecutiveOverviewPage.tsx
+│           ├── ChannelAnalyticsPage.tsx
+│           ├── FunnelViewPage.tsx
+│           ├── AttributionStudioPage.tsx
+│           └── SettingsPage.tsx
 └── RUN.md                  # Step-by-step run guide
 ```
 
@@ -39,12 +73,13 @@ Mproject/
 
 | Page | Route | Description |
 |------|-------|-------------|
-| Executive Overview | `/` | KPIs, Spend vs Revenue trend, channel ranking |
-| Channel Analytics | `/channels` | Spend by channel, conversion efficiency, campaign table |
-| Funnel View | `/funnel` | User journey funnel, stage conversion %, drop-off |
-| Attribution Studio | `/attribution` | Model selector, channel credit, revenue redistribution, ranking |
+| Executive Overview | `/` | KPIs with animated counters, area charts, smart recommendations, channel ranking |
+| Channel Analytics | `/channels` | Bar charts, pie charts, conversion efficiency, campaign table |
+| Funnel View | `/funnel` | Visual funnel, stage analysis, conversion rates, drop-off tracking |
+| Attribution Studio | `/attribution` | 5 attribution models, radar chart, revenue redistribution, ranking cards |
+| Settings | `/settings` | Theme, currency, notifications, data management, about info |
 
-All pages use **mock data** from the API. No database required to run.
+All pages use **mock data** from the API. Upload a CSV to replace with real data.
 
 ---
 
